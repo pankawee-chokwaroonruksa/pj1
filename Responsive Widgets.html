@@ -1,0 +1,1230 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>efin · Responsive Widgets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* efin.finance design tokens */
+:root {
+  --surface-0: #ffffff;
+  --surface-1: #fbfbfb;
+  --surface-2: #f7f7f7;
+  --surface-3: #f7f8f8;
+  --surface-tint-blue: #f5f9ff;
+  --surface-tint-blue-2: #d6f2ff;
+  --border-1: #e9ebf0;
+  --border-2: #edeef1;
+  --border-3: #d8dbdf;
+  --border-4: #e8e8e8;
+  --text-1: #25272c;
+  --text-2: #5b616e;
+  --text-3: #8e95a2;
+  --text-4: #b6bac3;
+  --text-5: #d8dbdf;
+  --brand: #007dfe;
+  --brand-soft: #d6f2ff;
+  --brand-soft-2: #e8f3ff;
+  --up: #40bc7c;
+  --up-deep: #2d8b76;
+  --up-soft: #e7f8ee;
+  --down: #e64040;
+  --down-soft: #fdecec;
+  --down-light: #f87171;
+  --shadow-card: 0 4px 20px 13px rgba(0,42,105,0.05);
+  --shadow-card-2: 0 4px 20px 0 rgba(0,64,162,0.05);
+  --shadow-pop: 0 8px 24px rgba(11,11,11,0.1);
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
+  --font-th: "Noto Sans Thai","Sarabun",system-ui,-apple-system,sans-serif;
+  --font-num: "Inter","Noto Sans Thai",system-ui,sans-serif;
+  --tile-gap: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-th);
+  color: var(--text-1);
+  background: #eef0f4;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1;
+}
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.up { color: var(--up); }
+.down { color: var(--down); }
+.muted { color: var(--text-3); }
+.dim { color: var(--text-2); }
+.scroll-x { overflow-x: auto; }
+.scroll-x::-webkit-scrollbar { height: 6px; }
+.scroll-x::-webkit-scrollbar-thumb { background: var(--border-3); border-radius: 999px; }
+.scroll-x::-webkit-scrollbar-track { background: transparent; }
+
+/* Shell */
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid var(--border-1);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.topbar .brand-mark {
+  font-weight: 700; font-size: 16px; color: var(--text-1);
+  letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;
+}
+.topbar .brand-mark .dot {
+  width: 10px; height: 10px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand), #5fa8ff);
+}
+.topbar .spacer { flex: 1; }
+
+/* Segmented control */
+.seg { display: inline-flex; background: var(--surface-2); border-radius: var(--r-pill); padding: 3px; gap: 2px; }
+.seg button {
+  appearance: none; border: 0; background: transparent; font: inherit;
+  padding: 6px 12px; border-radius: var(--r-pill); color: var(--text-2); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap;
+}
+.seg button.active { background: var(--surface-0); color: var(--text-1); box-shadow: 0 1px 2px rgba(0,0,0,0.06); font-weight: 600; }
+
+/* Btn */
+.btn {
+  appearance: none; border: 1px solid var(--border-1); background: var(--surface-0);
+  font: inherit; padding: 6px 12px; border-radius: 8px; color: var(--text-1); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+}
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+.btn.primary:hover { filter: brightness(0.95); }
+.btn.ghost { border-color: transparent; background: transparent; }
+.btn.ghost:hover { background: var(--surface-2); }
+
+/* Viewport frame */
+.viewport-frame { margin: 20px auto; max-width: 100%; transition: max-width 220ms ease; background: transparent; }
+.viewport-frame.mobile  { max-width: 390px; }
+.viewport-frame.tablet  { max-width: 768px; }
+.viewport-frame.laptop  { max-width: 1180px; }
+.viewport-frame.desktop { max-width: 1400px; }
+
+/* Dashboard grid */
+.grid { display: grid; gap: var(--tile-gap); padding: 16px; grid-auto-rows: 120px; }
+.viewport-frame.desktop .grid { grid-template-columns: repeat(4, 1fr); }
+.viewport-frame.laptop  .grid { grid-template-columns: repeat(4, 1fr); }
+.viewport-frame.tablet  .grid { grid-template-columns: repeat(2, 1fr); }
+.viewport-frame.mobile  .grid { grid-template-columns: repeat(1, 1fr); grid-auto-rows: 120px; }
+
+/* Cell */
+.cell {
+  position: relative; background: var(--surface-0); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card); display: flex; flex-direction: column;
+  min-width: 0; overflow: hidden;
+}
+.cell.editing { outline: 2px dashed var(--brand); outline-offset: -1px; }
+.cell.dragging { opacity: 0.55; }
+
+/* Widget header */
+.w-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px 6px; flex: 0 0 auto; }
+.w-head .title { font-size: 14px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.w-head .meta { margin-left: auto; font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.w-head .meta select, .w-head .pill {
+  appearance: none; font: inherit; padding: 4px 10px; border-radius: var(--r-pill);
+  background: var(--surface-2); border: 0; font-size: 12px; color: var(--text-2); cursor: pointer;
+}
+.w-body { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; padding: 0 16px 14px; gap: 8px; }
+
+/* Resize handle */
+.resize-handle {
+  position: absolute; right: 4px; bottom: 4px; width: 18px; height: 18px;
+  border-radius: 4px; cursor: nwse-resize; opacity: 0; transition: opacity 120ms;
+  display: grid; place-items: center; color: var(--text-3);
+}
+.cell:hover .resize-handle, .editing .resize-handle { opacity: 1; }
+.resize-handle::after {
+  content: ""; width: 12px; height: 12px;
+  background: linear-gradient(135deg, transparent 60%, var(--text-3) 60% 65%, transparent 65% 75%, var(--text-3) 75% 80%, transparent 80% 90%, var(--text-3) 90% 95%, transparent 95%);
+}
+
+/* Drag handle */
+.drag-handle {
+  position: absolute; top: 6px; left: 6px; width: 24px; height: 24px;
+  display: grid; place-items: center; color: var(--text-4); cursor: grab;
+  opacity: 0; transition: opacity 120ms; border-radius: 6px;
+}
+.cell:hover .drag-handle, .editing .drag-handle { opacity: 1; }
+.drag-handle:hover { background: var(--surface-2); color: var(--text-2); }
+.drag-handle:active { cursor: grabbing; }
+
+/* Table */
+table.t { width: 100%; border-collapse: collapse; font-size: 12px; color: var(--text-1); }
+table.t thead th {
+  text-align: right; font-weight: 400; color: var(--text-3);
+  padding: 8px 10px; border-bottom: 1px solid var(--border-1);
+  white-space: nowrap; background: var(--surface-0); position: sticky; top: 0;
+}
+table.t thead th:first-child, table.t tbody td:first-child { text-align: left; }
+table.t tbody td { padding: 7px 10px; border-bottom: 1px solid var(--border-2); text-align: right; white-space: nowrap; }
+table.t tbody tr:last-child td { border-bottom: 0; }
+table.t.zebra tbody tr:nth-child(2n) { background: rgba(247,248,248,0.6); }
+table.t.compact thead th, table.t.compact tbody td { padding: 5px 8px; font-size: 11px; }
+table.t .sym { font-weight: 600; color: var(--text-1); }
+
+/* Table container */
+.t-wrap { border: 1px solid var(--border-1); border-radius: var(--r-md); overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.t-scroll { overflow: auto; flex: 1; min-height: 0; }
+.t-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.t-scroll::-webkit-scrollbar-thumb { background: var(--border-3); border-radius: 999px; }
+
+/* Stat block */
+.stat-num { font-family: var(--font-num); font-weight: 700; letter-spacing: -0.02em; font-feature-settings: "tnum" 1; }
+.kpi-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.kpi-pill.up { background: var(--up-soft); color: var(--up-deep); }
+.kpi-pill.down { background: var(--down-soft); color: var(--down); }
+
+/* Mini grid for Market Info */
+.mi-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; font-size: 12px; }
+.mi-stats > div { display: flex; justify-content: space-between; gap: 8px; }
+.mi-stats .lbl { color: var(--text-3); }
+.mi-stats .val { font-family: var(--font-num); color: var(--text-1); font-weight: 500; }
+
+/* Movement bar */
+.move { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 4px; }
+.move .b { border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; align-items: flex-start; font-size: 11px; }
+.move .b strong { font-family: var(--font-num); font-size: 14px; font-weight: 700; }
+.move .b small { color: var(--text-3); }
+.move .b.u { background: var(--up-soft); color: var(--up-deep); }
+.move .b.d { background: var(--down-soft); color: var(--down); }
+.move .b.n { background: var(--surface-2); color: var(--text-2); }
+.move .b.u strong { color: var(--up); }
+.move .b.d strong { color: var(--down); }
+.move .b.n strong { color: var(--text-1); }
+
+/* Tabs */
+.tabs { display: inline-flex; background: var(--surface-2); border-radius: var(--r-pill); padding: 2px; font-size: 12px; }
+.tabs button { appearance: none; border: 0; background: transparent; padding: 4px 10px; border-radius: var(--r-pill); cursor: pointer; color: var(--text-2); font: inherit; }
+.tabs button.active { background: var(--surface-0); color: var(--text-1); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+/* Chart */
+.chart-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.legend .chip { padding: 2px 10px; border-radius: 999px; font-size: 11px; color: #fff; display: inline-flex; align-items: center; gap: 6px; }
+
+/* Size-aware density */
+.cell[data-cw="1"] .w-head .meta .label-th { display: none; }
+.cell[data-cw="1"] .w-body { padding: 0 12px 12px; }
+.cell[data-cw="1"] .w-head { padding: 12px 12px 4px; }
+
+/* Edit grid bg */
+.grid.editing-bg { background: linear-gradient(0deg, rgba(0,125,254,0.04), rgba(0,125,254,0.04)); border-radius: 12px; }
+
+/* Hover tooltip */
+.row-pop { position: absolute; background: #1a2230; color: #fff; font-size: 11px; padding: 8px 10px; border-radius: 6px; pointer-events: none; white-space: nowrap; box-shadow: var(--shadow-pop); }
+
+/* Size badge */
+.size-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,125,254,0.92); color: #fff;
+  font-family: var(--font-num); font-size: 10px; padding: 2px 6px;
+  border-radius: 999px; letter-spacing: 0.04em; pointer-events: none;
+  opacity: 0; transition: opacity 120ms;
+}
+.cell.editing .size-badge { opacity: 1; }
+
+@media (max-width: 640px) {
+  .w-head { padding: 12px 12px 4px; }
+  .w-body { padding: 0 12px 12px; }
+  table.t thead th, table.t tbody td { padding: 6px 8px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- DATA -->
+<script>
+window.EFIN_DATA = {
+  marketIndices: [
+    { name: "SET 100", last: 1747.91, chg: -2.27, pct: -0.29, prev: 1252.10, open: 1281.50, high: 1278.16, low: 1281.50, vol: 271809, val: 23531.99, mktCap: 4566329, up: 239, unchanged: 252, down: 196 },
+    { name: "SET",     last: 1352.42, chg: 3.21,  pct: 0.24,  prev: 1349.21, open: 1351.20, high: 1359.10, low: 1348.30, vol: 521000, val: 41200.50, mktCap: 17231290, up: 412, unchanged: 311, down: 287 },
+    { name: "SET50",   last: 902.55,  chg: -1.18, pct: -0.13, prev: 903.73,  open: 905.21,  high: 906.10,  low: 901.40,  vol: 192000, val: 14800.20, mktCap: 9182002, up: 17, unchanged: 9, down: 24 },
+    { name: "mai",     last: 268.32,  chg: 0.92,  pct: 0.34,  prev: 267.40,  open: 267.90,  high: 269.10,  low: 267.20,  vol: 88000,  val:  900.10,  mktCap: 280440, up: 110, unchanged: 65, down: 71 },
+  ],
+  fundFlow: [
+    { name: "บัญชีบล.",    buy: 4108.16, sell: 4108.16, net:  4108.16 },
+    { name: "ต่างประเทศ",  buy: 4108.16, sell: 4108.16, net: -2208.41 },
+    { name: "ในประเทศ",   buy: 4108.16, sell: 4108.16, net:  1820.30 },
+    { name: "บัญชีบุคคล", buy: 4108.16, sell: 4108.16, net:    50.18 },
+  ],
+  fundFlowChart: {
+    days: 30,
+    series: [
+      { name: "บัญชีบล.",   color: "#40bc7c", values: [] },
+      { name: "ต่างประเทศ",  color: "#3b82f6", values: [] },
+      { name: "ในประเทศ",   color: "#f59e0b", values: [] },
+      { name: "บัญชีบุคคล",  color: "#a855f7", values: [] },
+    ],
+  },
+  sectors: [
+    { sym: "AGRO",    idx: 152.50,  chg: -2.51, pct: -1.62, pe: 19.22, pbv: 1.34,  vol: "39.5M", val: "498M" },
+    { sym: "FOOD",    idx:  72.21,  chg: -0.55, pct: -0.76, pe: 4.40,  pbv: 1.34,  vol: "39.5M", val: "498M" },
+    { sym: "FASHION", idx:  84.71,  chg: -0.78, pct: -0.91, pe: 7.22,  pbv: 14.59, vol: "39.5M", val: "498M" },
+    { sym: "HOME",    idx: 168.13,  chg:  2.38, pct:  1.43, pe: 1.94,  pbv: 19.22, vol: "168M",  val: "1.6K" },
+    { sym: "PERSON",  idx:  98.51,  chg:  0.95, pct:  0.97, pe: 24.44, pbv: 14.59, vol: "39.5M", val: "455M" },
+    { sym: "BANK",    idx: 412.05,  chg: -1.41, pct: -0.34, pe: 7.22,  pbv: 74.55, vol: "455M",  val: "2.3K" },
+    { sym: "FIN",     idx: 168.13,  chg:  2.38, pct:  1.43, pe: 1.94,  pbv: 14.59, vol: "168M",  val: "498M" },
+    { sym: "INSUR",   idx: 1142.50, chg:-22.51, pct: -1.97, pe: 1.94,  pbv: 1.34,  vol: "39.5M", val: "455M" },
+    { sym: "AUTO",    idx:  84.71,  chg: -0.78, pct: -0.91, pe: 7.22,  pbv: 14.31, vol: "39.5M", val: "498M" },
+    { sym: "IMM",     idx:  72.21,  chg: -1.41, pct: -0.34, pe: 1.94,  pbv: 14.59, vol: "39.5M", val: "1.6K" },
+    { sym: "PAPER",   idx:  84.71,  chg:  0.78, pct:  0.91, pe: 7.22,  pbv: 14.59, vol: "39.5M", val: "455M" },
+    { sym: "PETRO",   idx: 412.05,  chg: -1.41, pct: -0.34, pe: 1.94,  pbv: 14.59, vol: "455M",  val: "2.3K" },
+    { sym: "PKG",     idx:  72.21,  chg:  0.92, pct:  1.27, pe: 4.40,  pbv: 11.07, vol: "39.5M", val: "498M" },
+  ],
+  industries: [
+    { sym: "AGRO",    idx: 152.50,  chg: -2.51, pct: -1.62, vol: "74.55", val: "455M", time: "10/12/68" },
+    { sym: "CONSUMP", idx:  72.21,  chg: -0.55, pct: -0.76, vol: "4.4",   val: "74.55", time: "10/12/68" },
+    { sym: "FINCIAL", idx:  84.71,  chg: -0.78, pct: -0.91, vol: "0.85",  val: "74.55", time: "10/12/68" },
+    { sym: "INDUS",   idx: 168.13,  chg:  2.38, pct:  1.43, vol: "5.90",  val: "74.55", time: "10/12/68" },
+    { sym: "PROPCON", idx:  98.51,  chg:  0.45, pct:  0.46, vol: "0.45",  val: "53.55", time: "10/12/68" },
+    { sym: "RESOURC", idx: 412.05,  chg: -1.41, pct: -0.34, vol: "9.55",  val: "74.55", time: "10/12/68" },
+    { sym: "SERVICE", idx:  74.04,  chg: -0.55, pct: -0.76, vol: "47.96", val: "11.99", time: "10/12/68" },
+    { sym: "TECH",    idx:   7.21,  chg: -0.20, pct: -0.21, vol: "5.95",  val: "10.55", time: "10/12/68" },
+  ],
+  foreignIndex: [
+    { sym: "DJI",    prev: 38754.30, open: 38754.30, high: 38754.30, low: 38754.30, close: 38754.30, chg:  12.40,  pct:  0.03, time: "09/05/26", note: "New Year's Day…", ref: "www.djindexes.com" },
+    { sym: "IXIC",   prev: 16320.10, open: 16320.10, high: 16320.10, low: 16320.10, close: 16320.10, chg: -33.10,  pct: -0.20, time: "09/05/26", note: "New Year's Day…", ref: "www.nasdaq.com" },
+    { sym: "SPX",    prev:  5210.30, open:  5210.30, high:  5210.30, low:  5210.30, close:  5210.30, chg:   5.20,  pct:  0.10, time: "09/05/26", note: "New Year's Day…", ref: "www.spglobal.com" },
+    { sym: "FTSE",   prev:  8210.10, open:  8210.10, high:  8210.10, low:  8210.10, close:  8210.10, chg:  -1.10,  pct: -0.01, time: "09/05/26", note: "New Year's Day…", ref: "www.lseg.com" },
+    { sym: "DAX",    prev: 17820.40, open: 17820.40, high: 17820.40, low: 17820.40, close: 17820.40, chg:  21.10,  pct:  0.12, time: "09/05/26", note: "New Year's Day…", ref: "www.dax-indices.com" },
+    { sym: "NIKKEI", prev: 39220.55, open: 39220.55, high: 39220.55, low: 39220.55, close: 39220.55, chg:-110.40,  pct: -0.28, time: "09/05/26", note: "New Year's Day…", ref: "www.jpx.co.jp" },
+    { sym: "HSI",    prev: 18120.10, open: 18120.10, high: 18120.10, low: 18120.10, close: 18120.10, chg:   9.20,  pct:  0.05, time: "09/05/26", note: "New Year's Day…", ref: "www.hkex.com.hk" },
+    { sym: "SSEC",   prev:  3210.20, open:  3210.20, high:  3210.20, low:  3210.20, close:  3210.20, chg:  -2.10,  pct: -0.07, time: "09/05/26", note: "New Year's Day…", ref: "www.sse.com.cn" },
+    { sym: "KS11",   prev:  2718.90, open:  2718.90, high:  2718.90, low:  2718.90, close:  2718.90, chg:  11.10,  pct:  0.41, time: "09/05/26", note: "New Year's Day…", ref: "www.krx.co.kr" },
+    { sym: "TWII",   prev: 19120.10, open: 19120.10, high: 19120.10, low: 19120.10, close: 19120.10, chg: -22.10,  pct: -0.11, time: "09/05/26", note: "New Year's Day…", ref: "www.twse.com.tw" },
+  ],
+  fx: [
+    { sym: "BAHTUSD", prev: 0.0276, open: 0.0276, high: 0.0276, low: 0.0276, close: 0.0276, chg: 0.0001, pct:  0.36, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTEUR", prev: 0.0258, open: 0.0258, high: 0.0259, low: 0.0258, close: 0.0258, chg: 0.0000, pct:  0.05, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTJPY", prev: 4.2100, open: 4.2100, high: 4.2200, low: 4.2100, close: 4.2150, chg: 0.0050, pct:  0.12, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTGBP", prev: 0.0220, open: 0.0220, high: 0.0221, low: 0.0220, close: 0.0220, chg: 0.0001, pct:  0.45, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTCNY", prev: 0.2000, open: 0.2000, high: 0.2002, low: 0.1998, close: 0.2001, chg: 0.0001, pct:  0.05, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTSGD", prev: 0.0372, open: 0.0372, high: 0.0373, low: 0.0371, close: 0.0372, chg: 0.0000, pct: -0.03, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTHKD", prev: 0.2150, open: 0.2150, high: 0.2155, low: 0.2148, close: 0.2152, chg: 0.0002, pct:  0.09, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+    { sym: "BAHTKRW", prev: 37.250, open: 37.250, high: 37.310, low: 37.220, close: 37.280, chg: 0.0300, pct:  0.08, time: "09/05/26", note: "New Year's Day…", ref: "www.bot.or.th" },
+  ],
+  commodities: [
+    { sym: "OIL",      prev:   78.10, open:   78.10, high:   78.55, low:   77.92, close:   78.32, chg:  0.22,  pct: 0.28, time: "09/05/26", note: "—", ref: "www.cmegroup.com" },
+    { sym: "GOLD",     prev: 2310.50, open: 2310.50, high: 2318.30, low: 2306.10, close: 2314.80, chg:  4.30,  pct: 0.19, time: "09/05/26", note: "—", ref: "www.lbma.org.uk" },
+    { sym: "SILVER",   prev:   27.40, open:   27.40, high:   27.60, low:   27.31, close:   27.55, chg:  0.15,  pct: 0.55, time: "09/05/26", note: "—", ref: "www.lbma.org.uk" },
+    { sym: "NATGAS",   prev:    2.10, open:    2.10, high:    2.13, low:    2.08, close:    2.11, chg:  0.01,  pct: 0.48, time: "09/05/26", note: "—", ref: "www.cmegroup.com" },
+    { sym: "COPPER",   prev:   4.520, open:   4.520, high:   4.540, low:   4.510, close:   4.535, chg:  0.015, pct: 0.33, time: "09/05/26", note: "—", ref: "www.cmegroup.com" },
+    { sym: "PLATINUM", prev: 1018.30, open: 1018.30, high: 1024.10, low: 1015.40, close: 1020.20, chg:  1.90,  pct: 0.19, time: "09/05/26", note: "—", ref: "www.cmegroup.com" },
+  ],
+};
+
+(function buildSeries() {
+  const ff = window.EFIN_DATA.fundFlowChart;
+  const N = ff.days;
+  const seeds = [
+    { amp: 1.0, base:  20000, freq: 0.32, phase: 0.0 },
+    { amp: 1.4, base:  60000, freq: 0.21, phase: 0.6 },
+    { amp: 1.2, base: -40000, freq: 0.28, phase: 1.4 },
+    { amp: 0.9, base: -10000, freq: 0.45, phase: 2.1 },
+  ];
+  ff.series.forEach((s, i) => {
+    const seed = seeds[i % seeds.length];
+    const values = [];
+    for (let k = 0; k < N; k++) {
+      const t = k / (N - 1);
+      const v = seed.base +
+        Math.sin(seed.phase + t * Math.PI * 4 * seed.freq) * 80000 * seed.amp +
+        Math.sin(seed.phase * 2 + t * Math.PI * 7) * 25000 * seed.amp;
+      values.push(v);
+    }
+    s.values = values;
+  });
+})();
+</script>
+
+<!-- ALL JSX COMPONENTS (inlined) -->
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback, useMemo } = React;
+
+// ── Tweaks Panel ─────────────────────────────────────────────────────────────
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;scrollbar-width:thin}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;
+    border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;padding:0;border:0;
+    border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);transition:transform .12s,box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+function useTweaks(defaults) {
+  const [values, setValues] = useState(defaults);
+  const setTweak = useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null ? keyOrEdits : { [keyOrEdits]: val };
+    setValues(prev => ({ ...prev, ...edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = useState(false);
+  const dragRef = useRef(null);
+  const offsetRef = useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(clampToViewport) : null;
+    if (ro) { ro.observe(document.documentElement); return () => ro.disconnect(); }
+    window.addEventListener('resize', clampToViewport);
+    return () => window.removeEventListener('resize', clampToViewport);
+  }, [open, clampToViewport]);
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = { x: startRight - (ev.clientX - sx), y: startBottom - (ev.clientY - sy) };
+      clampToViewport();
+    };
+    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) {
+    return (
+      <button className="btn" onClick={() => setOpen(true)}
+        style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 2147483645, boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Tweaks
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel"
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" onClick={() => setOpen(false)}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+function TweakSection({ label, children }) {
+  return <><div className="twk-sect">{label}</div>{children}</>;
+}
+function TweakRow({ label, value, children }) {
+  return (
+    <div className="twk-row">
+      <div className="twk-lbl"><span>{label}</span>{value != null && <span className="twk-val">{value}</span>}</div>
+      {children}
+    </div>
+  );
+}
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={e => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={e => onChange(e.target.value)}>
+        {options.map(o => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row" style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between', gap:10}}>
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+function TweakButton({ label, onClick, secondary = false }) {
+  return <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'} onClick={onClick}>{label}</button>;
+}
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'space-between', gap:10}}>
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value} onChange={e => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  const key = o => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" data-on={on ? '1' : '0'}
+                    style={{ background: hero }} onClick={() => onChange(o)}>
+              {sup.length > 0 && <span>{sup.map((c, j) => <i key={j} style={{ background: c }} />)}</span>}
+              {on && <svg viewBox="0 0 14 14" style={{position:'absolute',top:6,left:6,width:13,height:13}}>
+                <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" stroke="#fff"/>
+              </svg>}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+// ── Primitives ────────────────────────────────────────────────────────────────
+const fmt = {
+  num: (v, d = 2) => {
+    if (v == null || isNaN(v)) return "—";
+    return Number(v).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  },
+  int: v => Number(v).toLocaleString("en-US"),
+  sign: (v, d = 2) => {
+    const n = Number(v);
+    return (n > 0 ? "+" : n < 0 ? "−" : "") + fmt.num(Math.abs(n), d);
+  },
+  pct: (v, d = 2) => fmt.sign(v, d) + "%",
+};
+
+function ChgPill({ chg, pct, size = "sm" }) {
+  const cls = chg > 0 ? "up" : chg < 0 ? "down" : "muted";
+  return (
+    <span className={`kpi-pill ${cls === "muted" ? "" : cls} num`} style={{ fontSize: size === "lg" ? 13 : 12 }}>
+      {fmt.sign(chg)} ({fmt.pct(pct)})
+    </span>
+  );
+}
+
+function Caret({ dir = "down" }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"
+         style={{ transform: dir === "up" ? "rotate(180deg)" : "none" }}>
+      <path d="M2 4l3 3 3-3z" />
+    </svg>
+  );
+}
+
+function DragGrip() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+      <circle cx="5" cy="3" r="1"/><circle cx="9" cy="3" r="1"/>
+      <circle cx="5" cy="7" r="1"/><circle cx="9" cy="7" r="1"/>
+      <circle cx="5" cy="11" r="1"/><circle cx="9" cy="11" r="1"/>
+    </svg>
+  );
+}
+
+// ── Market Info Widget ────────────────────────────────────────────────────────
+function MarketInfoWidget({ cw, ch, indexName }) {
+  const D = window.EFIN_DATA;
+  const [picked, setPicked] = useState(indexName || "SET 100");
+  const idx = D.marketIndices.find(m => m.name === picked) || D.marketIndices[0];
+  const up = idx.chg >= 0;
+  const tiny = cw === 1 && ch === 1;
+  const wide = cw >= 2;
+
+  return (
+    <React.Fragment>
+      <div className="w-head">
+        <select className="pill" value={picked} onChange={e => setPicked(e.target.value)}
+                style={{display:"inline-flex", alignItems:"center", gap:4}}>
+          {D.marketIndices.map(m => <option key={m.name} value={m.name}>{m.name}</option>)}
+        </select>
+        <span className="meta">
+          {cw >= 2 && <span className="label-th muted" style={{fontSize:11}}>ข้อมูล ณ</span>}
+          <span className="num" style={{fontSize:11, color:"var(--text-2)"}}>
+            {cw === 1 ? "16:35" : "09/05/26 16:35"}
+          </span>
+        </span>
+      </div>
+      <div className="w-body">
+        <div style={{display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap"}}>
+          <span className="stat-num" style={{ fontSize: tiny ? 22 : (cw === 1 ? 28 : 36), color: up ? "var(--up)" : "var(--down)", lineHeight: 1.05 }}>
+            {fmt.num(idx.last)}
+          </span>
+          <ChgPill chg={idx.chg} pct={idx.pct} size="lg" />
+        </div>
+        {!tiny && (
+          <div className="mi-stats" style={{ marginTop: 6 }}>
+            <div><span className="lbl">Prev</span><span className="val">{fmt.num(idx.prev)}</span></div>
+            <div><span className="lbl">Open</span><span className="val">{fmt.num(idx.open)}</span></div>
+            <div><span className="lbl">Low</span><span className="val">{fmt.num(idx.low)}</span></div>
+            <div><span className="lbl">High</span><span className="val">{fmt.num(idx.high)}</span></div>
+            {wide && <div><span className="lbl">Vol(K)</span><span className="val">{fmt.int(idx.vol)}</span></div>}
+            {wide && <div><span className="lbl">Val(MB)</span><span className="val">{fmt.num(idx.val)}</span></div>}
+            {wide && ch >= 2 && <div><span className="lbl">Mkt Cap</span><span className="val">{fmt.int(idx.mktCap)}</span></div>}
+          </div>
+        )}
+        {(ch >= 2 || wide) && (
+          <div style={{marginTop: "auto"}}>
+            <div style={{fontSize:11, color:"var(--text-3)", marginBottom: 4}}>Market Movement</div>
+            <div className="move">
+              <div className="b u"><strong>{idx.up}</strong><small>ขึ้น {Math.round(idx.up/(idx.up+idx.unchanged+idx.down)*100)}%</small></div>
+              <div className="b n"><strong>{idx.unchanged}</strong><small>เท่าเดิม</small></div>
+              <div className="b d"><strong>{idx.down}</strong><small>ลง {Math.round(idx.down/(idx.up+idx.unchanged+idx.down)*100)}%</small></div>
+            </div>
+          </div>
+        )}
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ── Fund Flow Table Widget ────────────────────────────────────────────────────
+function FundFlowWidget({ cw, ch }) {
+  const D = window.EFIN_DATA;
+  const [period, setPeriod] = useState("day");
+  const total = D.fundFlow.reduce((s, r) => s + r.buy, 0);
+  const compact = cw === 1;
+  const label = period === "day" ? "สิ้นวัน" : period === "month" ? "รายเดือน" : "รายปี";
+
+  return (
+    <React.Fragment>
+      <div className="w-head">
+        <div className="title">สรุปมูลค่าการซื้อขาย{label}</div>
+        <span className="meta">
+          {!compact && <span className="muted" style={{fontSize:11}}>ข้อมูล ณ</span>}
+          <span className="pill">9 พ.ค. 2569</span>
+        </span>
+      </div>
+      <div className="w-body">
+        <div className="tabs" style={{alignSelf:"flex-start"}}>
+          <button className={period==="day"?"active":""} onClick={() => setPeriod("day")}>รายวัน</button>
+          <button className={period==="month"?"active":""} onClick={() => setPeriod("month")}>รายเดือน</button>
+          <button className={period==="year"?"active":""} onClick={() => setPeriod("year")}>รายปี</button>
+        </div>
+        {ch >= 2 && (
+          <div style={{ borderRadius:8, background:"var(--surface-tint-blue)", padding:"10px 12px", display:"flex", justifyContent:"center", alignItems:"baseline", gap:8 }}>
+            <span className="stat-num" style={{color:"var(--brand)", fontSize: compact ? 22 : 30}}>{fmt.num(total)}</span>
+            <span style={{fontSize: compact ? 14 : 18, color:"var(--text-1)"}}>ล้านบาท</span>
+          </div>
+        )}
+        <div className="t-wrap" style={{flex:1}}>
+          <div className="t-scroll">
+            <table className={`t ${compact ? "compact" : ""}`}>
+              <thead>
+                <tr>
+                  <th>นักลงทุน</th>
+                  <th>ซื้อ{!compact && " (ล้านบาท)"}</th>
+                  <th>ขาย{!compact && " (ล้านบาท)"}</th>
+                  <th style={{whiteSpace:"nowrap"}}>สุทธิ <Caret /></th>
+                </tr>
+              </thead>
+              <tbody>
+                {D.fundFlow.map((r, i) => (
+                  <tr key={i}>
+                    <td className="sym">{r.name}</td>
+                    <td className="num">{fmt.num(r.buy)}</td>
+                    <td className="num">{fmt.num(r.sell)}</td>
+                    <td className={`num ${r.net >= 0 ? "up" : "down"}`}>{fmt.sign(r.net)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ── Fund Flow Chart Widget ────────────────────────────────────────────────────
+function FundFlowChartWidget({ cw, ch }) {
+  const D = window.EFIN_DATA.fundFlowChart;
+  const [hover, setHover] = useState(null);
+  const [enabled, setEnabled] = useState(D.series.map(() => true));
+  const containerRef = useRef(null);
+  const [dims, setDims] = useState({ w: 400, h: 200 });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const r = entry.contentRect;
+      setDims({ w: Math.max(100, r.width), h: Math.max(80, r.height) });
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const pad = { t: 8, r: 8, b: 18, l: 44 };
+  const W = dims.w, H = dims.h;
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+  const activeSeries = D.series.filter((_, i) => enabled[i]);
+  const all = activeSeries.flatMap(s => s.values);
+  const minV = activeSeries.length ? Math.min(...all) : -100000;
+  const maxV = activeSeries.length ? Math.max(...all) : 100000;
+  const span = maxV - minV || 1;
+  const N = D.days;
+  const xAt = i => pad.l + (i / (N - 1)) * innerW;
+  const yAt = v => pad.t + (1 - (v - minV) / span) * innerH;
+  const ticks = Array.from({ length: 5 }, (_, i) => minV + (span * i) / 4);
+
+  const onMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    let i = Math.round(((x - pad.l) / innerW) * (N - 1));
+    i = Math.max(0, Math.min(N - 1, i));
+    setHover({ i, mx: x });
+  };
+
+  return (
+    <React.Fragment>
+      <div className="w-head">
+        <div className="title">สรุปมูลค่าการซื้อขายสิ้นวัน</div>
+        <span className="meta">
+          <span className="muted" style={{fontSize:11}}>ข้อมูล ณ</span>
+          <span className="pill">4 ก.ค. 2569</span>
+        </span>
+      </div>
+      <div className="w-body">
+        <div ref={containerRef} className="chart-wrap" style={{position:"relative"}} onMouseLeave={() => setHover(null)}>
+          <svg width={W} height={H} onMouseMove={onMove} style={{display:"block"}}>
+            {ticks.map((v, i) => (
+              <g key={i}>
+                <line x1={pad.l} x2={W - pad.r} y1={yAt(v)} y2={yAt(v)} stroke="var(--border-1)" strokeDasharray="2 4"/>
+                <text x={pad.l - 6} y={yAt(v)+3} fontSize="10" textAnchor="end" fill="var(--text-3)" fontFamily="Inter">
+                  {Math.round(v/1000)}K
+                </text>
+              </g>
+            ))}
+            {[0, Math.floor(N/3), Math.floor(2*N/3), N-1].map(i => (
+              <text key={i} x={xAt(i)} y={H-4} fontSize="10" textAnchor="middle" fill="var(--text-3)" fontFamily="Inter">
+                {`${i+1} มิ.ย.`}
+              </text>
+            ))}
+            {D.series.map((s, si) => {
+              if (!enabled[si]) return null;
+              const d = s.values.map((v, i) => `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(v).toFixed(1)}`).join(" ");
+              return <path key={si} d={d} fill="none" stroke={s.color} strokeWidth="1.6"/>;
+            })}
+            {hover && (
+              <g>
+                <line x1={xAt(hover.i)} x2={xAt(hover.i)} y1={pad.t} y2={H - pad.b} stroke="var(--text-1)" strokeOpacity="0.3"/>
+                {D.series.map((s, si) => !enabled[si] ? null :
+                  <circle key={si} cx={xAt(hover.i)} cy={yAt(s.values[hover.i])} r="3" fill={s.color} stroke="#fff" strokeWidth="1.5"/>
+                )}
+              </g>
+            )}
+          </svg>
+          {hover && (
+            <div className="row-pop" style={{ left: Math.min(W - 180, xAt(hover.i) + 8), top: 8 }}>
+              <div style={{opacity:0.7, marginBottom:4}}>{hover.i+1} มิ.ย. 2569</div>
+              {D.series.map((s, si) => enabled[si] && (
+                <div key={si} style={{display:"flex", justifyContent:"space-between", gap:14}}>
+                  <span style={{color: s.color}}>● {s.name}</span>
+                  <span className="num">{Math.round(s.values[hover.i]/1000)}K</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="legend">
+          {D.series.map((s, si) => (
+            <button key={si} onClick={() => setEnabled(e => e.map((v, i) => i === si ? !v : v))}
+              className="chip" style={{ background: enabled[si] ? s.color : "var(--surface-2)", color: enabled[si] ? "#fff" : "var(--text-3)", border: "0", cursor: "pointer" }}>
+              {s.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ── Index Table Widget (Sector / Industry) ────────────────────────────────────
+function IndexTableWidget({ cw, ch, kind = "sector" }) {
+  const D = window.EFIN_DATA;
+  const rows = kind === "sector" ? D.sectors : D.industries;
+  const title = kind === "sector" ? "Sector Index" : "Industry Index";
+  const compact = cw === 1;
+  const showExtraSector = kind === "sector" && cw >= 2;
+  const showTime = kind === "industry" && cw >= 2;
+
+  return (
+    <React.Fragment>
+      <div className="w-head">
+        <div className="pill" style={{display:"inline-flex",alignItems:"center",gap:4}}>{title}</div>
+        <span className="meta">
+          <span className="muted" style={{fontSize:11}}>ข้อมูล ณ</span>
+          <span className="num" style={{fontSize:11, color:"var(--text-2)"}}>9 พ.ค. 2569</span>
+        </span>
+      </div>
+      <div className="w-body">
+        <div className="t-wrap">
+          <div className="t-scroll">
+            <table className={`t zebra ${compact ? "compact" : ""}`}>
+              <thead>
+                <tr>
+                  <th>Sector</th>
+                  <th>Index</th>
+                  <th>Chg</th>
+                  <th style={{whiteSpace:"nowrap"}}>%Chg <Caret /></th>
+                  {showExtraSector && <th>P/E</th>}
+                  {showExtraSector && <th>P/BV</th>}
+                  {showExtraSector && <th>AccVol.</th>}
+                  {showExtraSector && cw >= 3 && <th>AccVal.(K฿)</th>}
+                  {showTime && <th>AccVol.</th>}
+                  {showTime && <th>AccVal.</th>}
+                  {showTime && <th>Time</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => {
+                  const cls = r.chg > 0 ? "up" : r.chg < 0 ? "down" : "";
+                  return (
+                    <tr key={i}>
+                      <td className="sym">{r.sym}</td>
+                      <td className={`num ${cls}`}>{fmt.num(r.idx)}</td>
+                      <td className={`num ${cls}`}>{fmt.sign(r.chg)}</td>
+                      <td className={`num ${cls}`}>{fmt.pct(r.pct)}</td>
+                      {showExtraSector && <td className="num">{fmt.num(r.pe)}</td>}
+                      {showExtraSector && <td className="num">{fmt.num(r.pbv)}</td>}
+                      {showExtraSector && <td className="num">{r.vol}</td>}
+                      {showExtraSector && cw >= 3 && <td className="num">{r.val}</td>}
+                      {showTime && <td className="num">{r.vol}</td>}
+                      {showTime && <td className="num">{r.val}</td>}
+                      {showTime && <td className="num muted">{r.time}</td>}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ── Foreign Table Widget (Foreign Index / FX / Commodities) ──────────────────
+function ForeignTableWidget({ cw, ch, kind = "foreign" }) {
+  const D = window.EFIN_DATA;
+  const dataMap = {
+    foreign: { rows: D.foreignIndex, label: "Foreign Index" },
+    fx:      { rows: D.fx,           label: "Foreign Exchange" },
+    com:     { rows: D.commodities,  label: "Commodities" },
+  };
+  const cfg = dataMap[kind] || dataMap.foreign;
+  const compact = cw === 1;
+  const showOHLC = cw >= 2;
+  const showRef  = cw >= 3;
+  const showNote = cw >= 3;
+  const showTime = cw >= 2;
+  const dec = kind === "fx" ? 4 : 2;
+
+  return (
+    <React.Fragment>
+      <div className="w-head">
+        <div className="pill" style={{display:"inline-flex",alignItems:"center",gap:4}}>{cfg.label}</div>
+        <span className="meta">
+          {!compact && <span className="muted" style={{fontSize:11}}>ข้อมูล ณ</span>}
+          <span className="num" style={{fontSize:11, color:"var(--text-2)"}}>09/05/26</span>
+        </span>
+      </div>
+      <div className="w-body">
+        <div className="t-wrap">
+          <div className="t-scroll">
+            <table className={`t zebra ${compact ? "compact" : ""}`}>
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Prev</th>
+                  {showOHLC && <th>Open</th>}
+                  {showOHLC && <th>High</th>}
+                  {showOHLC && <th>Low</th>}
+                  <th>Close</th>
+                  <th>Chg</th>
+                  <th style={{whiteSpace:"nowrap"}}>%Chg <Caret /></th>
+                  {showTime && <th>End of Day</th>}
+                  {showNote && <th>Holiday</th>}
+                  {showRef  && <th>Reference</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {cfg.rows.map((r, i) => {
+                  const cls = r.chg > 0 ? "up" : r.chg < 0 ? "down" : "";
+                  return (
+                    <tr key={i}>
+                      <td className="sym" style={{color: cls === "up" ? "var(--up)" : cls === "down" ? "var(--down)" : undefined}}>{r.sym}</td>
+                      <td className="num">{fmt.num(r.prev, dec)}</td>
+                      {showOHLC && <td className="num">{fmt.num(r.open, dec)}</td>}
+                      {showOHLC && <td className="num">{fmt.num(r.high, dec)}</td>}
+                      {showOHLC && <td className="num">{fmt.num(r.low, dec)}</td>}
+                      <td className={`num ${cls}`}>{fmt.num(r.close, dec)}</td>
+                      <td className={`num ${cls}`}>{fmt.sign(r.chg, dec)}</td>
+                      <td className={`num ${cls}`}>{fmt.pct(r.pct)}</td>
+                      {showTime && <td className="num muted">{r.time}</td>}
+                      {showNote && <td className="muted" style={{maxWidth:120, overflow:"hidden", textOverflow:"ellipsis"}}>{r.note}</td>}
+                      {showRef  && <td><a href="#" style={{color:"var(--brand)", textDecoration:"none", fontSize: compact ? 10 : 12}}>{r.ref}</a></td>}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ── Widget Registry & Default Layout ─────────────────────────────────────────
+const WIDGET_REGISTRY = {
+  marketInfo:    (p) => <MarketInfoWidget {...p} />,
+  fundFlow:      (p) => <FundFlowWidget {...p} />,
+  fundFlowChart: (p) => <FundFlowChartWidget {...p} />,
+  sector:        (p) => <IndexTableWidget {...p} kind="sector" />,
+  industry:      (p) => <IndexTableWidget {...p} kind="industry" />,
+  foreignIdx:    (p) => <ForeignTableWidget {...p} kind="foreign" />,
+  fx:            (p) => <ForeignTableWidget {...p} kind="fx" />,
+  commodities:   (p) => <ForeignTableWidget {...p} kind="com" />,
+};
+
+const WIDGET_DEFS = {
+  marketInfo:    { type: "marketInfo",    label: "Market Info",       min: [1,1], max: [4,3] },
+  fundFlow:      { type: "fundFlow",      label: "Fund Flow (Table)", min: [1,2], max: [4,4] },
+  fundFlowChart: { type: "fundFlowChart", label: "Fund Flow (Chart)", min: [2,2], max: [4,4] },
+  sector:        { type: "sector",        label: "Sector Index",      min: [1,2], max: [4,5] },
+  industry:      { type: "industry",      label: "Industry Index",    min: [1,2], max: [4,5] },
+  foreignIdx:    { type: "foreignIdx",    label: "Foreign Index",     min: [2,2], max: [4,6] },
+  fx:            { type: "fx",            label: "Foreign Exchange",  min: [2,2], max: [4,6] },
+  commodities:   { type: "commodities",   label: "Commodities",       min: [2,2], max: [4,5] },
+};
+
+const DEFAULT_LAYOUT = [
+  { id: "w1", def: WIDGET_DEFS.marketInfo,    w: 1, h: 2, props: { indexName: "SET 100" } },
+  { id: "w2", def: WIDGET_DEFS.marketInfo,    w: 1, h: 2, props: { indexName: "SET" } },
+  { id: "w3", def: WIDGET_DEFS.marketInfo,    w: 1, h: 2, props: { indexName: "SET50" } },
+  { id: "w4", def: WIDGET_DEFS.marketInfo,    w: 1, h: 2, props: { indexName: "mai" } },
+  { id: "w5", def: WIDGET_DEFS.fundFlow,      w: 2, h: 3 },
+  { id: "w6", def: WIDGET_DEFS.fundFlowChart, w: 2, h: 3 },
+  { id: "w7", def: WIDGET_DEFS.sector,        w: 2, h: 4 },
+  { id: "w8", def: WIDGET_DEFS.industry,      w: 2, h: 4 },
+  { id: "w9", def: WIDGET_DEFS.foreignIdx,    w: 4, h: 4 },
+  { id: "wA", def: WIDGET_DEFS.fx,            w: 4, h: 4 },
+  { id: "wB", def: WIDGET_DEFS.commodities,   w: 4, h: 3 },
+];
+
+// ── Dashboard Cell ────────────────────────────────────────────────────────────
+function WidgetCell({ widget, idx, edit, onChange, breakpoint, dragSrc, setDragSrc, onMove }) {
+  const ref = useRef(null);
+  const [resizing, setResizing] = useState(null);
+  const [drag, setDrag] = useState(false);
+
+  const cw = resizing ? resizing.w : widget.w;
+  const ch = resizing ? resizing.h : widget.h;
+  const maxCols = breakpoint === "mobile" ? 1 : breakpoint === "tablet" ? 2 : 4;
+  const effW = Math.min(cw, maxCols);
+
+  const startResize = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!ref.current) return;
+    const startX = e.clientX, startY = e.clientY;
+    const rect = ref.current.getBoundingClientRect();
+    const parent = ref.current.parentElement;
+    const parentRect = parent.getBoundingClientRect();
+    const gridStyle = getComputedStyle(parent);
+    const cols = gridStyle.gridTemplateColumns.split(" ").length || 4;
+    const gap = parseFloat(getComputedStyle(parent).gap) || 16;
+    const tileW = (parentRect.width - (cols - 1) * gap - 32) / cols;
+    const tileH = parseFloat(gridStyle.gridAutoRows) || 120;
+    const def = widget.def;
+
+    const onMouseMove = (ev) => {
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      let nw = Math.round((rect.width + dx) / (tileW + gap));
+      let nh = Math.round((rect.height + dy) / (tileH + gap));
+      nw = Math.max(def.min[0], Math.min(def.max[0], nw, maxCols));
+      nh = Math.max(def.min[1], Math.min(def.max[1], nh));
+      setResizing({ w: nw, h: nh });
+    };
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      setResizing(r => { if (r) onChange({ ...widget, w: r.w, h: r.h }); return null; });
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }, [widget, maxCols, onChange]);
+
+  const handleDragStart = (e) => {
+    if (!edit) return;
+    setDragSrc(idx); setDrag(true);
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", String(idx)); } catch {}
+  };
+  const handleDragOver = (e) => { if (edit && dragSrc != null && dragSrc !== idx) e.preventDefault(); };
+  const handleDrop = (e) => {
+    if (edit && dragSrc != null && dragSrc !== idx) { e.preventDefault(); onMove(dragSrc, idx); }
+    setDragSrc(null); setDrag(false);
+  };
+  const handleDragEnd = () => { setDragSrc(null); setDrag(false); };
+
+  const C = WIDGET_REGISTRY[widget.def.type];
+
+  return (
+    <div ref={ref}
+         className={`cell ${edit ? "editing" : ""} ${drag ? "dragging" : ""}`}
+         data-cw={effW} data-ch={ch}
+         style={{ gridColumn: `span ${effW}`, gridRow: `span ${ch}` }}
+         draggable={edit}
+         onDragStart={handleDragStart}
+         onDragOver={handleDragOver}
+         onDrop={handleDrop}
+         onDragEnd={handleDragEnd}>
+      {C && <C cw={effW} ch={ch} {...(widget.props || {})} />}
+      {edit && (
+        <React.Fragment>
+          <div className="drag-handle" title="Drag to reorder"><DragGrip /></div>
+          <div className="size-badge">{effW}×{ch}</div>
+          <div className="resize-handle" onMouseDown={startResize} title="Drag to resize" />
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+function App() {
+  const [breakpoint, setBp] = useState("desktop");
+  const [edit, setEdit] = useState(false);
+  const [layout, setLayout] = useState(() => {
+    try { const s = localStorage.getItem("efin-widgets-layout-v2"); if (s) return JSON.parse(s); } catch {}
+    return DEFAULT_LAYOUT;
+  });
+  const [dragSrc, setDragSrc] = useState(null);
+
+  const [t, setT] = useTweaks({
+    brand: "#007dfe", up: "#40bc7c", down: "#e64040",
+    surface: "#ffffff", page: "#eef0f4",
+    fontFamily: "Noto Sans Thai",
+    tileGap: 16, tileRow: 120, radius: 12,
+  });
+
+  useEffect(() => {
+    const r = document.documentElement.style;
+    r.setProperty("--brand", t.brand);
+    r.setProperty("--up", t.up);
+    r.setProperty("--down", t.down);
+    r.setProperty("--surface-0", t.surface);
+    r.setProperty("--tile-gap", t.tileGap + "px");
+    r.setProperty("--r-lg", t.radius + "px");
+    document.body.style.background = t.page;
+    document.body.style.fontFamily = `"${t.fontFamily}", system-ui, sans-serif`;
+    document.documentElement.style.setProperty("--font-th", `"${t.fontFamily}", system-ui, sans-serif`);
+  }, [t]);
+
+  useEffect(() => {
+    const w = window.innerWidth;
+    if (w < 640) setBp("mobile");
+    else if (w < 1024) setBp("tablet");
+    else if (w < 1440) setBp("laptop");
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("efin-widgets-layout-v2", JSON.stringify(layout)); } catch {}
+  }, [layout]);
+
+  const updateAt = (i, w) => setLayout(L => L.map((x, k) => k === i ? w : x));
+  const moveItem = (from, to) => setLayout(L => {
+    const a = [...L]; const [it] = a.splice(from, 1); a.splice(to, 0, it); return a;
+  });
+  const reset = () => setLayout(DEFAULT_LAYOUT);
+
+  const rowH = breakpoint === "mobile" ? 100 : breakpoint === "tablet" ? 110 : t.tileRow;
+
+  const bps = [
+    ["mobile",  "Mobile",  "< 640"],
+    ["tablet",  "Tablet",  "768"],
+    ["laptop",  "Laptop",  "1180"],
+    ["desktop", "Desktop", "1400"],
+  ];
+
+  return (
+    <div className="shell">
+      <div className="topbar">
+        <div className="brand-mark"><span className="dot" /> efin · Widgets</div>
+        <div className="seg" role="tablist">
+          {bps.map(([k, label, sub]) => (
+            <button key={k} className={breakpoint === k ? "active" : ""} onClick={() => setBp(k)}>
+              <BpIcon kind={k} />
+              <span style={{display:"inline-flex", flexDirection:"column", lineHeight:1, alignItems:"flex-start"}}>
+                <span style={{fontSize:12}}>{label}</span>
+                <span style={{fontSize:10, color:"var(--text-3)"}}>{sub}px</span>
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className="spacer" />
+        <button className={`btn ${edit ? "primary" : ""}`} onClick={() => setEdit(e => !e)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          {edit ? "Done editing" : "Edit dashboard"}
+        </button>
+        <button className="btn ghost" onClick={reset}>Reset</button>
+      </div>
+
+      <div className={`viewport-frame ${breakpoint}`}>
+        <div className={`grid ${edit ? "editing-bg" : ""}`} style={{ gridAutoRows: `${rowH}px` }}>
+          {layout.map((w, i) => (
+            <WidgetCell key={w.id} widget={w} idx={i} edit={edit}
+              onChange={nw => updateAt(i, nw)} breakpoint={breakpoint}
+              dragSrc={dragSrc} setDragSrc={setDragSrc} onMove={moveItem} />
+          ))}
+        </div>
+      </div>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Colors">
+          <TweakColor label="Brand"   value={t.brand}   onChange={v => setT("brand", v)}   options={["#007dfe","#0b5cad","#7c3aed","#e11d48","#0ea5e9"]} />
+          <TweakColor label="Up"      value={t.up}      onChange={v => setT("up", v)}      options={["#40bc7c","#16a34a","#2dd4bf"]} />
+          <TweakColor label="Down"    value={t.down}    onChange={v => setT("down", v)}    options={["#e64040","#dc2626","#f97316"]} />
+          <TweakColor label="Page bg" value={t.page}    onChange={v => setT("page", v)}    options={["#eef0f4","#f5f7fb","#0f172a","#ffffff"]} />
+          <TweakColor label="Card bg" value={t.surface} onChange={v => setT("surface", v)} options={["#ffffff","#fbfbfb","#1a2230"]} />
+        </TweakSection>
+        <TweakSection label="Type &amp; layout">
+          <TweakSelect label="Font" value={t.fontFamily} onChange={v => setT("fontFamily", v)}
+            options={[
+              {value:"Noto Sans Thai",    label:"Noto Sans Thai"},
+              {value:"Sarabun",           label:"Sarabun"},
+              {value:"Inter",             label:"Inter"},
+              {value:"IBM Plex Sans Thai",label:"IBM Plex Sans Thai"},
+            ]} />
+          <TweakSlider label="Tile gap"    value={t.tileGap} unit="px" min={4}  max={32}  step={2}  onChange={v => setT("tileGap", v)} />
+          <TweakSlider label="Row height"  value={t.tileRow} unit="px" min={80} max={180} step={10} onChange={v => setT("tileRow", v)} />
+          <TweakSlider label="Card radius" value={t.radius}  unit="px" min={0}  max={24}  step={1}  onChange={v => setT("radius", v)} />
+        </TweakSection>
+        <TweakSection label="Layout">
+          <TweakButton label="Reset to default" onClick={reset} />
+          <TweakButton label={edit ? "Exit edit mode" : "Enter edit mode"} onClick={() => setEdit(e => !e)} secondary />
+        </TweakSection>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+function BpIcon({ kind }) {
+  const sw = "1.6";
+  if (kind === "mobile")  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw}><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>;
+  if (kind === "tablet")  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw}><rect x="4" y="3" width="16" height="18" rx="2"/></svg>;
+  if (kind === "laptop")  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw}><rect x="3" y="5" width="18" height="11" rx="1.5"/><path d="M2 19h20"/></svg>;
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw}><rect x="2" y="4" width="20" height="13" rx="1.5"/><path d="M9 21h6M12 17v4"/></svg>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
